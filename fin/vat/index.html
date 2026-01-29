@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAT Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .calculator-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+        }
+
+        .calculator-section h2 {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .vat-rate-group {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .vat-rate-group input {
+            flex: 1;
+        }
+
+        .vat-rate-group span {
+            padding: 12px 10px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+            font-weight: bold;
+            border-top: 1px solid #b8daff;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .result-label {
+            color: #495057;
+        }
+
+        .result-value {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .currency {
+            font-family: monospace;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .calculator-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VAT Calculator</h1>
+        
+        <!-- Forward Calculation: Price → Price + VAT -->
+        <div class="calculator-section">
+            <h2>📊 Calculate VAT (Price → Price + VAT)</h2>
+            
+            <div class="input-group">
+                <label for="basePrice">Base Price (excluding VAT):</label>
+                <input type="number" id="basePrice" placeholder="Enter price without VAT" step="0.01" min="0">
+            </div>
+            
+            <div class="input-group">
+                <label for="vatRate1">VAT Rate:</label>
+                <div class="vat-rate-group">
+                    <input type="number" id="vatRate1" value="20" step="0.1" min="0" max="100">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <div class="result" id="forwardResult" style="display: none;">
+                <div class="result-item">
+                    <span class="result-label">Base Price:</span>
+                    <span class="result-value currency" id="forwardBase">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">VAT Amount:</span>
+                    <span class="result-value currency" id="forwardVat">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total (inc. VAT):</span>
+                    <span class="result-value currency" id="forwardTotal">$0.00</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reverse Calculation: Price + VAT → Price -->
+        <div class="calculator-section">
+            <h2>🔄 Reverse Calculate VAT (Price + VAT → Price)</h2>
+            
+            <div class="input-group">
+                <label for="totalPrice">Total Price (including VAT):</label>
+                <input type="number" id="totalPrice" placeholder="Enter price with VAT" step="0.01" min="0">
+            </div>
+            
+            <div class="input-group">
+                <label for="vatRate2">VAT Rate:</label>
+                <div class="vat-rate-group">
+                    <input type="number" id="vatRate2" value="20" step="0.1" min="0" max="100">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <div class="result" id="reverseResult" style="display: none;">
+                <div class="result-item">
+                    <span class="result-label">Base Price:</span>
+                    <span class="result-value currency" id="reverseBase">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">VAT Amount:</span>
+                    <span class="result-value currency" id="reverseVat">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total (inc. VAT):</span>
+                    <span class="result-value currency" id="reverseTotal">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Currency formatter
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(amount);
+        };
+
+        // Forward calculation: Base price + VAT rate → Total price
+        function calculateForward() {
+            const basePrice = parseFloat(document.getElementById('basePrice').value) || 0;
+            const vatRate = parseFloat(document.getElementById('vatRate1').value) || 0;
+            
+            if (basePrice > 0) {
+                const vatAmount = basePrice * (vatRate / 100);
+                const totalPrice = basePrice + vatAmount;
+                
+                document.getElementById('forwardBase').textContent = formatCurrency(basePrice);
+                document.getElementById('forwardVat').textContent = formatCurrency(vatAmount);
+                document.getElementById('forwardTotal').textContent = formatCurrency(totalPrice);
+                document.getElementById('forwardResult').style.display = 'block';
+            } else {
+                document.getElementById('forwardResult').style.display = 'none';
+            }
+        }
+
+        // Reverse calculation: Total price + VAT rate → Base price
+        function calculateReverse() {
+            const totalPrice = parseFloat(document.getElementById('totalPrice').value) || 0;
+            const vatRate = parseFloat(document.getElementById('vatRate2').value) || 0;
+            
+            if (totalPrice > 0) {
+                const basePrice = totalPrice / (1 + (vatRate / 100));
+                const vatAmount = totalPrice - basePrice;
+                
+                document.getElementById('reverseBase').textContent = formatCurrency(basePrice);
+                document.getElementById('reverseVat').textContent = formatCurrency(vatAmount);
+                document.getElementById('reverseTotal').textContent = formatCurrency(totalPrice);
+                document.getElementById('reverseResult').style.display = 'block';
+            } else {
+                document.getElementById('reverseResult').style.display = 'none';
+            }
+        }
+
+        // Event listeners for real-time calculation
+        document.getElementById('basePrice').addEventListener('input', calculateForward);
+        document.getElementById('vatRate1').addEventListener('input', calculateForward);
+        document.getElementById('totalPrice').addEventListener('input', calculateReverse);
+        document.getElementById('vatRate2').addEventListener('input', calculateReverse);
+
+        // Sync VAT rates between both calculators
+        document.getElementById('vatRate1').addEventListener('input', function() {
+            document.getElementById('vatRate2').value = this.value;
+        });
+        
+        document.getElementById('vatRate2').addEventListener('input', function() {
+            document.getElementById('vatRate1').value = this.value;
+        });
+    </script>
+</body>
+</html>
+
